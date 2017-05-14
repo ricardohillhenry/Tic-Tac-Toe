@@ -4,8 +4,10 @@ body = document.querySelector("body"),
 start_screen = "",
 turn_o = document.getElementsByTagName("svg")[0],
 turn_x = document.getElementsByTagName("svg")[1];
+//spit = body.children["div"];
 
 window.onload = () => {
+	console.log(body)
 	start_screen = showStart();
 	hideStart();
 
@@ -40,6 +42,8 @@ function hideStart(){
 		board.style.display = "block";
 	}
 }
+let boxes = Array.from(document.querySelector(".boxes").children),
+clickedBoxes = [];
 
 var player1 = {
 	//player: document.getElementsByClassName("players")[0],
@@ -52,29 +56,32 @@ var player1 = {
 		this.player.className = "players"
 	},
 	choose: () => {
-		let boxes = Array.from(document.querySelector(".boxes").children);
-		let click;
-		//boxes.forEach((box) => {
+		let clicked;
 		for(let x = 0; x < boxes.length; x++){
 			
-			boxes[x].addEventListener("mouseover",(event)=>{
-				click = false;
-				boxes[x].style.backgroundImage = "url(./img/o.svg)"; //file/letter should be retrieved from player object instance
-				//console.log(box)
-				
+			boxes[x].addEventListener("mouseenter",(event)=>{
+				clicked = false;
+				if(clickedBoxes[x] == boxes[x]){
+					event.stopImmediatePropagation();
+				}else{
+					boxes[x].style.backgroundImage = "url(./img/o.svg)"; //file/letter should be retrieved from player object instance	
+				}
 			});
 			boxes[x].addEventListener("mouseout",(event)=>{
 				
-				if(click == true){
+				if(clickedBoxes[x] == boxes[x]){
 					event.stopImmediatePropagation();
 				}else{
 					boxes[x].style.backgroundImage = "";
 				}
 			});
 			boxes[x].addEventListener('click', (event)=>{
-				click = true;
+				clicked = true;
 				boxes[x].style.backgroundImage = "url(./img/o.svg)";
-				//this.event.stopImmediatePropagation()
+				clickedBoxes[x] = boxes[x];
+				player1.inactive();
+				player2.active();
+				player2.choose();
 			});
 		}
 	}
@@ -88,19 +95,64 @@ var player2 = {
 	},
 	inactive: () => {
 		this.player.className = "players";
+	},
+	choose: () => {
+		let clickedBoxes = []; //empty clickedBoxes at start of new game
+		let click;
+		for(let x = 0; x < boxes.length; x++){
+			
+			boxes[x].addEventListener("mouseenter",(event)=>{
+				click = false;
+				if(clickedBoxes[x] == boxes[x]){
+					event.stopImmediatePropagation();
+				}else{
+					boxes[x].style.backgroundImage = "url(./img/x.svg)"; //file/letter should be retrieved from player object instance	
+				}
+			});
+			boxes[x].addEventListener("mouseout",(event)=>{
+				
+				if(clickedBoxes[x] == boxes[x]){
+					event.stopImmediatePropagation();
+				}else{
+					boxes[x].style.backgroundImage = "";
+				}
+			});
+			boxes[x].addEventListener('click', (event)=>{
+				click = true;
+				boxes[x].style.backgroundImage = "url(./img/x.svg)";
+				clickedBoxes[x] = boxes[x];
+				player2.inactive();
+				player1.active();
+				player1.choose();
+			});
+		}
+	},
+	checkStatus: () => {
+		for(let x = 0; x < boxes.length; x++){
+			if(clickedBoxes){
+
+			}
+		}
 	}
 }
 
-var players = [player1, player2]
-players.forEach((player) => {
-	player.status
-})
+// var Box = {
+// 	addEvents: () => {
+// 		boxes.forEach(box) => {
+// 			box.addEventListener("mouseenter",(e) => {
+// 				if(clickedBoxes == boxes[x]){
+// 					e.stopImmediatePropagation();
+// 				}else{
+// 					box.style.backgroundImage = "url(./img/o.svg)";
+// 				}
+// 			})
+// 		}
+// 	}
+// }
 
-//console.log(boxes);
-function mouseout(bool){
 
-}
 
-//Note to self:
-//Move mouseout and click out of mouseover scope, then try to break out
-//
+// Next to do:
+// 1) Alternate X and O after click
+// 2) Switch top active on click to indicate who's turn it is
+//012, 345, 678, 036, 147, 258, 048, 246
