@@ -1,25 +1,113 @@
 
+class Player{
+	
+	constructor(playerIndex){
+		Player.clicked = [];
+		this.playerIndex = playerIndex; // 0 is O, 1 is X
+		this.player = document.getElementsByClassName("players")[this.playerIndex];
+		Player.boxes = Array.from(document.querySelector(".boxes").children);
+		this.clicked = [];
+		this.clickedBoxIndexes = [];
+	}
+	active(){
+		this.player.classList.add("active");
+	}
+	inactive(){
+		this.player.classList.remove("active");
+	}
+	choose(opponent){
+		let _this = this,
+		clickedLength = Player.clicked.length;
+		_this.active();
+		console.log(clickedLength)
+		Player.boxes.forEach((box) => {
+			if(_this.status() !== true && opponent.status() !== true){
+				box.addEventListener("mouseenter", function forMouseEnter(event){
+					if(Player.clicked.length > clickedLength){
+						box.removeEventListener("mouseenter", forMouseEnter);
+					}else if(!(box.classList.contains("box-filled-2")) && _this.playerIndex === 0){
+						box.classList.add("box-filled-1");	
+						event.stopImmediatePropagation();
+					}else if(!(box.classList.contains("box-filled-1")) && _this.playerIndex === 1){
+						box.classList.add("box-filled-2");	
+						event.stopImmediatePropagation();
+					}
+				});
+				box.addEventListener("mouseout",function forMouseOut(event){
+					if(Player.clicked.length > clickedLength){
+						box.removeEventListener("mouseout", forMouseOut);
+					}else if(!(Player.clicked.includes(box))){
+						box.classList.remove("box-filled-1");
+						box.classList.remove("box-filled-2")
+					}
+				});
+				box.addEventListener('click', function forMouseClick(event){
+					//_this.status();
+					if(Player.clicked.length > clickedLength){
+						box.removeEventListener("click", forMouseClick);
+					}else if(!(Player.clicked.includes(box)) && !(box.classList.contains("box-filled-2")) && _this.playerIndex === 0){
+						//console.log(Player.boxes.indexOf(box))
+						_this.clickedBoxIndexes.push(Player.boxes.indexOf(box));
+						box.classList.add("box-filled-1");
+						Player.clicked.push(box);
+						_this.clicked.push(box);
+						_this.inactive();
+						opponent.active();
+						opponent.choose(_this);
+					}else if(!(Player.clicked.includes(box)) && !(box.classList.contains("box-filled-1")) && _this.playerIndex === 1){
+						_this.clickedBoxIndexes.push(Player.boxes.indexOf(box));
+						box.classList.add("box-filled-2");
+						Player.clicked.push(box);
+						_this.clicked.push(box);
+						_this.inactive();
+						opponent.active();
+						opponent.choose(_this);
+					}
+				});
+			}
+		});
+	}
+	status(){
+		if(this.clickedBoxIndexes.includes(0) && this.clickedBoxIndexes.includes(3) && this.clickedBoxIndexes.includes(6)){
+			return true;
+		}else if(this.clickedBoxIndexes.includes(0) && this.clickedBoxIndexes.includes(1) && this.clickedBoxIndexes.includes(2)){
+			return true;
+		}else if(this.clickedBoxIndexes.includes(0) && this.clickedBoxIndexes.includes(4) && this.clickedBoxIndexes.includes(8)){
+			return true;
+		}else if(this.clickedBoxIndexes.includes(3) && this.clickedBoxIndexes.includes(4) && this.clickedBoxIndexes.includes(5)){
+			return true;
+		}else if(this.clickedBoxIndexes.includes(6) && this.clickedBoxIndexes.includes(7) && this.clickedBoxIndexes.includes(8)){
+			return true;
+		}else if(this.clickedBoxIndexes.includes(1) && this.clickedBoxIndexes.includes(4) && this.clickedBoxIndexes.includes(7)){
+			return true;
+		}else if(this.clickedBoxIndexes.includes(2) && this.clickedBoxIndexes.includes(5) && this.clickedBoxIndexes.includes(8)){
+			return true;
+		}else if(this.clickedBoxIndexes.includes(2) && this.clickedBoxIndexes.includes(4) && this.clickedBoxIndexes.includes(6)){
+			return true;
+		}else{
+			return false; //Game resulted in a draw..if draw and Player.clicked.length === 9
+		}
+	}
+}
+
+
 var board = document.getElementById("board"),
 body = document.querySelector("body"),
 start_screen = "",
-turn_o = document.getElementsByTagName("svg")[0],
-turn_x = document.getElementsByTagName("svg")[1];
-//spit = body.children["div"];
+player1 = new Player(0),
+player2 = new Player(1);;
+
 
 window.onload = () => {
 	console.log(body)
 	start_screen = showStart();
 	hideStart();
 
-	turn_x.onclick = (e) => {
-		player1.inactive();
-		player2.active();
-	}
 };
 
 
 
-//=========== Functions ============
+/*=========== Functions Start ============*/
 function showStart(){
 	let start_screen = document.createElement("div");
 
@@ -29,8 +117,10 @@ function showStart(){
 	start_screen.id = "start";
 	document.body.insertBefore(start_screen,board);
 	start_screen.innerHTML = "<header><h1>Tic Tac Toe</h1><a href=\"#\" class=\"button\">Start game</a></header>";
-	player1.active();
- 	player1.choose()
+	//for(let x = 0; x < Player.boxes.length; x++){
+		player1.choose(player2)
+		//player2.choose()
+	//}
 	return start_screen;
 }
 
@@ -42,117 +132,10 @@ function hideStart(){
 		board.style.display = "block";
 	}
 }
-let boxes = Array.from(document.querySelector(".boxes").children),
-clickedBoxes = [];
+/*=========== Functions End  ============*/
 
-var player1 = {
-	//player: document.getElementsByClassName("players")[0],
-	active: () => {
-		this.player = document.getElementsByClassName("players")[0];
-		this.status = "active"
-		this.player.className += " active";
-	},
-	inactive: () => {
-		this.player.className = "players"
-	},
-	choose: () => {
-		let clicked;
-		for(let x = 0; x < boxes.length; x++){
-			
-			boxes[x].addEventListener("mouseenter",(event)=>{
-				clicked = false;
-				if(clickedBoxes[x] == boxes[x]){
-					event.stopImmediatePropagation();
-				}else{
-					boxes[x].style.backgroundImage = "url(./img/o.svg)"; //file/letter should be retrieved from player object instance	
-				}
-			});
-			boxes[x].addEventListener("mouseout",(event)=>{
-				
-				if(clickedBoxes[x] == boxes[x]){
-					event.stopImmediatePropagation();
-				}else{
-					boxes[x].style.backgroundImage = "";
-				}
-			});
-			boxes[x].addEventListener('click', (event)=>{
-				clicked = true;
-				boxes[x].style.backgroundImage = "url(./img/o.svg)";
-				clickedBoxes[x] = boxes[x];
-				player1.inactive();
-				player2.active();
-				player2.choose();
-			});
-		}
-	}
+
+if(player1.status() === true || player2.status() === true){
+	document.body.insertBefore()
 }
-
-var player2 = {
-	//player: document.getElementsByClassName("players")[0],
-	active: () => {
-		this.player = document.getElementsByClassName("players")[1];
-		this.player.className += " active";
-	},
-	inactive: () => {
-		this.player.className = "players";
-	},
-	choose: () => {
-		let clickedBoxes = []; //empty clickedBoxes at start of new game
-		let click;
-		for(let x = 0; x < boxes.length; x++){
-			
-			boxes[x].addEventListener("mouseenter",(event)=>{
-				click = false;
-				if(clickedBoxes[x] == boxes[x]){
-					event.stopImmediatePropagation();
-				}else{
-					boxes[x].style.backgroundImage = "url(./img/x.svg)"; //file/letter should be retrieved from player object instance	
-				}
-			});
-			boxes[x].addEventListener("mouseout",(event)=>{
-				
-				if(clickedBoxes[x] == boxes[x]){
-					event.stopImmediatePropagation();
-				}else{
-					boxes[x].style.backgroundImage = "";
-				}
-			});
-			boxes[x].addEventListener('click', (event)=>{
-				click = true;
-				boxes[x].style.backgroundImage = "url(./img/x.svg)";
-				clickedBoxes[x] = boxes[x];
-				player2.inactive();
-				player1.active();
-				player1.choose();
-			});
-		}
-	},
-	checkStatus: () => {
-		for(let x = 0; x < boxes.length; x++){
-			if(clickedBoxes){
-
-			}
-		}
-	}
-}
-
-// var Box = {
-// 	addEvents: () => {
-// 		boxes.forEach(box) => {
-// 			box.addEventListener("mouseenter",(e) => {
-// 				if(clickedBoxes == boxes[x]){
-// 					e.stopImmediatePropagation();
-// 				}else{
-// 					box.style.backgroundImage = "url(./img/o.svg)";
-// 				}
-// 			})
-// 		}
-// 	}
-// }
-
-
-
-// Next to do:
-// 1) Alternate X and O after click
-// 2) Switch top active on click to indicate who's turn it is
-//012, 345, 678, 036, 147, 258, 048, 246
+ 
