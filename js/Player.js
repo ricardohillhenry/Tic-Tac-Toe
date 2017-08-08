@@ -9,6 +9,7 @@ class Player{
 		this.player = document.getElementsByClassName("players")[this.playerIndex];
 		this.clickedBoxIndexes = [];
 		this.playerOpponent = '';
+		this.winnerStatus = false;
 	}
 	active(){
 		//Adds the active class to the player's rectangle
@@ -79,6 +80,7 @@ class Player{
 				//callback2(); //!!!!!!callback@() is causing problems when a new game is created
 				this.inactive();
 				Player.reset();
+				this.reset();
 				break; //Keeps from calling callback 9 times
 			}
 		}
@@ -94,9 +96,11 @@ class Player{
 			(this.clickedBoxIndexes.includes(2) && this.clickedBoxIndexes.includes(5) && this.clickedBoxIndexes.includes(8)) ||
 			(this.clickedBoxIndexes.includes(2) && this.clickedBoxIndexes.includes(4) && this.clickedBoxIndexes.includes(6)))
 		{
-			return true; //This player won
+			this.winnerStatus = true;
+			return this.winnerStatus; //This player won
 		}else{
-			return false; //This player did not win 
+			this.winnerStatus = false;
+			return this.winnerStatus; //This player did not win 
 		}
 	}
 	drawStatus(){
@@ -112,13 +116,16 @@ class Player{
 	static reset(){
 		//reset critical code that should be passed around between games
 		Player.clicked = [];
+		Player.clickedBoxIndexes = [];
 		Player.boxes = Array.from(document.querySelector(".boxes").children);
 		Player.boxes.forEach((box) => {
+			//Empties boxes out after every game
 			box.className = "box";
-			box.removeEventListener("mouseenter", (e)=>{});
-			box.removeEventListener("mouseout", (e)=>{});
-			box.removeEventListener("click", (e)=>{});
 		});
+	}
+	reset(){
+		this.winnerStatus = false;
+		this.clickedBoxIndexes = [];
 	}
 }
 

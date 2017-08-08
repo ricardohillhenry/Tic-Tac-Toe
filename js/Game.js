@@ -4,10 +4,8 @@ class Game{
 		this.boxes = Array.from(document.querySelector(".boxes").children); //array property that represents each box on the game board
 		this.body = document.querySelector("body");
 		this.screen = ""
-		PlayerObject.reset();
 		this.player1 = new PlayerObject(0);
 		this.player2 = new PlayerObject(1);
-		this.winner = undefined;
 	}
 	start(){
 		//Method to start the first game
@@ -59,8 +57,9 @@ class Game{
 			this.display(tie_screen, 'tie');
 		}
 	}
-	static startNewGame(button){
+	startNewGame(button){
 		//Creates a new game when the button passed in is clicked
+		let _this = this;
 		button.onclick = (e) => {
 			let winner_screen = document.querySelector("#finish"),
 			body = document.querySelector("body");
@@ -68,8 +67,10 @@ class Game{
 			body.removeChild(winner_screen);		
 			Game.board.style.display = "block";
 			Player.reset();
-			let newGame = new Game(Player);
-			return newGame.player1.choose(newGame.player2, () => {newGame.displayWinnerScreen()}, () => {newGame.displayTieScreen()});	
+			this.player1.reset();
+			this.player2.reset();
+			this.player1.active();
+			this.player2.inactive();
 		}
 	}
 	display(screen, classEnding){
@@ -79,7 +80,7 @@ class Game{
 		screen.innerHTML = "<header><h1>Tic Tac Toe</h1><p class=\"message\"></p><a href=\"#\" class=\"button\">New game</a></header>";
 		let start_button = document.querySelector(".button");
 		this.player1.active();
-		Game.startNewGame(start_button);
+		this.startNewGame(start_button);
 	}
 }
 
